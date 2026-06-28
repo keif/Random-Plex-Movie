@@ -1,4 +1,5 @@
 import configparser
+import re
 import threading
 import webbrowser
 from random import choice
@@ -17,13 +18,17 @@ _plex_error = None
 _chosen_movie = None
 
 
+def _scrub_token(text):
+    return re.sub(r"X-Plex-Token=[^&\s\"']+", "X-Plex-Token=REDACTED", str(text))
+
+
 def _connect_plex():
     global _plex, _movies, _plex_error
     try:
         _plex = PlexServer(_config["auth"]["baseurl"], _config["auth"]["token"])
         _movies = _plex.library.section("Movies")
     except Exception as exc:
-        _plex_error = str(exc)
+        _plex_error = _scrub_token(exc)
 
 
 @app.route("/")
@@ -57,8 +62,9 @@ def get_movie():
             "poster": _chosen_movie.posterUrl,
             "background": _chosen_movie.artUrl,
         })
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        app.logger.exception("get_movie failed")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route("/api/clients")
@@ -67,8 +73,9 @@ def get_clients():
         return jsonify({"error": _plex_error}), 503
     try:
         return jsonify({"clients": [c.title for c in _plex.clients()]})
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        app.logger.exception("get_clients failed")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route("/api/play", methods=["POST"])
@@ -84,8 +91,9 @@ def play_movie():
     try:
         _plex.client(client_name).playMedia(_chosen_movie)
         return jsonify({"ok": True})
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    except Exception:
+        app.logger.exception("play_movie failed")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 def main():
