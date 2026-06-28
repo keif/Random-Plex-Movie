@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- `Dockerfile` and `docker-compose.yml` for containerised deployment
+- `PLEX_URL` and `PLEX_TOKEN` environment variables — take precedence over `config.ini` (useful for Docker and CI)
+- `host.docker.internal` default in `docker-compose.yml` so the container can reach a Plex server running on the host
+
+### Changed
+- Flask now binds to `0.0.0.0` so the port is reachable from outside the container
+- Browser auto-open is skipped when running inside Docker
+
 ## [2.0.0] - 2026-06-28
 
 ### Added
