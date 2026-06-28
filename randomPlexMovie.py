@@ -1,4 +1,5 @@
 import configparser
+import os
 import re
 import threading
 import webbrowser
@@ -12,10 +13,18 @@ app = Flask(__name__, static_folder="web", static_url_path="")
 _config = configparser.ConfigParser()
 _config.read("config/config.ini")
 
+# Env vars take precedence over config.ini (useful for Docker)
+_plex_url = os.environ.get("PLEX_URL") or _config.get("auth", "baseurl", fallback="http://localhost:32400")
+_plex_token = os.environ.get("PLEX_TOKEN") or _config.get("auth", "token", fallback="")
+
 _plex = None
 _movies = None
 _plex_error = None
 _chosen_movie = None
+
+
+def _in_docker():
+    return os.path.exists("/.dockerenv")
 
 
 def _scrub_token(text):
@@ -25,7 +34,7 @@ def _scrub_token(text):
 def _connect_plex():
     global _plex, _movies, _plex_error
     try:
-        _plex = PlexServer(_config["auth"]["baseurl"], _config["auth"]["token"])
+        _plex = PlexServer(_plex_url, _plex_token)
         _movies = _plex.library.section("Movies")
     except Exception as exc:
         _plex_error = _scrub_token(exc)
@@ -99,9 +108,10 @@ def play_movie():
 def main():
     _connect_plex()
     port = 4000
-    threading.Timer(0.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
     print(f"Random Plex Movie running at http://localhost:{port}")
-    app.run(port=port, debug=False)
+    if not _in_docker():
+        threading.Timer(0.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 
 if __name__ == "__main__":

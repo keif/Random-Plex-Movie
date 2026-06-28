@@ -1,0 +1,9 @@
+.venv
+.git
+.gitignore
+.claude
+.superpowers
+docs
+tests
+*.md
+*.map

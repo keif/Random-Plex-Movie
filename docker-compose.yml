@@ -1,0 +1,15 @@
+services:
+  random-plex-movie:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      # Plex is running on the host, not in Docker.
+      # host.docker.internal resolves to the host machine from inside the container.
+      # On Linux, uncomment the extra_hosts block below.
+      PLEX_URL: http://host.docker.internal:32400
+      PLEX_TOKEN: your-token-here
+    # Uncomment on Linux (Docker Desktop on macOS handles this automatically):
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    restart: unless-stopped
