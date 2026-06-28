@@ -7,7 +7,7 @@ from random import choice
 from flask import Flask, jsonify, request, send_from_directory
 from plexapi.server import PlexServer
 
-app = Flask(__name__, static_folder="web")
+app = Flask(__name__, static_folder="web", static_url_path="")
 
 _config = configparser.ConfigParser()
 _config.read("config/config.ini")
