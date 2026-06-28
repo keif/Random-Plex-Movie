@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-06-28
+
 ### Added
 - `Dockerfile` and `docker-compose.yml` for containerised deployment
 - `PLEX_URL` and `PLEX_TOKEN` environment variables — take precedence over `config.ini` (useful for Docker and CI)
@@ -44,5 +46,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/keif/Random-Plex-Movie/releases/tag/v2.0.0
