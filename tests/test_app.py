@@ -1,0 +1,121 @@
+import pytest
+from unittest.mock import MagicMock
+import randomPlexMovie as mod
+
+
+def _make_movie():
+    m = MagicMock()
+    m.title = "The Matrix"
+    m.year = 1999
+    m.duration = 8160000  # 2h 16m in ms
+    m.summary = "A hacker discovers reality is a simulation."
+    m.audienceRating = 8.7
+    m.genres = [MagicMock(tag="Action"), MagicMock(tag="Sci-Fi")]
+    m.directors = [MagicMock(tag="Lana Wachowski")]
+    m.writers = [MagicMock(tag="Lilly Wachowski")]
+    m.actors = [MagicMock(tag="Keanu Reeves"), MagicMock(tag="Laurence Fishburne")]
+    m.posterUrl = "http://plex.local/poster.jpg"
+    m.artUrl = "http://plex.local/art.jpg"
+    return m
+
+
+@pytest.fixture(autouse=True)
+def mock_plex(monkeypatch):
+    server = MagicMock()
+    section = MagicMock()
+    section.search.return_value = [_make_movie()]
+    server.clients.return_value = [MagicMock(title="Living Room TV")]
+    monkeypatch.setattr(mod, "_plex", server)
+    monkeypatch.setattr(mod, "_movies", section)
+    monkeypatch.setattr(mod, "_plex_error", None)
+    monkeypatch.setattr(mod, "_chosen_movie", None)
+    return server, section
+
+
+@pytest.fixture
+def client():
+    mod.app.config["TESTING"] = True
+    with mod.app.test_client() as c:
+        yield c
+
+
+class TestGetMovie:
+    def test_returns_full_movie_data(self, client):
+        r = client.get("/api/movie")
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data["title"] == "The Matrix"
+        assert data["year"] == 1999
+        assert data["duration_hours"] == 2
+        assert data["duration_minutes"] == 16
+        assert data["summary"] == "A hacker discovers reality is a simulation."
+        assert data["rating"] == 8.7
+        assert data["genres"] == ["Action", "Sci-Fi"]
+        assert data["directors"] == ["Lana Wachowski"]
+        assert data["writers"] == ["Lilly Wachowski"]
+        assert data["actors"] == ["Keanu Reeves", "Laurence Fishburne"]
+        assert data["poster"] == "http://plex.local/poster.jpg"
+        assert data["background"] == "http://plex.local/art.jpg"
+
+    def test_sets_chosen_movie_global(self, client):
+        client.get("/api/movie")
+        assert mod._chosen_movie is not None
+
+    def test_no_unwatched_returns_404(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = []
+        r = client.get("/api/movie")
+        assert r.status_code == 404
+        assert "error" in r.get_json()
+
+    def test_plex_error_returns_503(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        r = client.get("/api/movie")
+        assert r.status_code == 503
+        assert r.get_json()["error"] == "Connection refused"
+
+
+class TestGetClients:
+    def test_returns_client_names(self, client):
+        r = client.get("/api/clients")
+        assert r.status_code == 200
+        assert r.get_json() == {"clients": ["Living Room TV"]}
+
+    def test_empty_list_is_valid(self, client, mock_plex):
+        server, _ = mock_plex
+        server.clients.return_value = []
+        r = client.get("/api/clients")
+        assert r.status_code == 200
+        assert r.get_json() == {"clients": []}
+
+    def test_plex_error_returns_503(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        r = client.get("/api/clients")
+        assert r.status_code == 503
+
+
+class TestPlayMovie:
+    def test_plays_on_named_client(self, client, monkeypatch, mock_plex):
+        server, _ = mock_plex
+        monkeypatch.setattr(mod, "_chosen_movie", _make_movie())
+        r = client.post("/api/play", json={"client": "Living Room TV"})
+        assert r.status_code == 200
+        assert r.get_json() == {"ok": True}
+        server.client.assert_called_once_with("Living Room TV")
+
+    def test_no_movie_selected_returns_400(self, client):
+        r = client.post("/api/play", json={"client": "Living Room TV"})
+        assert r.status_code == 400
+        assert "error" in r.get_json()
+
+    def test_missing_client_field_returns_400(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_chosen_movie", _make_movie())
+        r = client.post("/api/play", json={})
+        assert r.status_code == 400
+        assert "error" in r.get_json()
+
+    def test_plex_error_returns_503(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        monkeypatch.setattr(mod, "_chosen_movie", _make_movie())
+        r = client.post("/api/play", json={"client": "Living Room TV"})
+        assert r.status_code == 503

@@ -1,87 +1,97 @@
-import eel
-import sys
 import configparser
-from eel import browsers
+import threading
+import webbrowser
+from random import choice
+
+from flask import Flask, jsonify, request, send_from_directory
 from plexapi.server import PlexServer
-from random import randint, choice
 
-# Plex authorization
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+app = Flask(__name__, static_folder="web")
 
-# If you get an OSError saying that the Chrome installation cannot be found,
-# in the config.ini file, change 'useCustomPath' to True and specify the file path leading
-# to your Chrome installation directory in 'path'.
-use_custom_path = config.getboolean('set_path', 'useCustomPath')
-filepath = config['set_path']['path']
+_config = configparser.ConfigParser()
+_config.read("config/config.ini")
 
-# Change the baseurl and token variables in config.ini file
-plex = PlexServer(config['auth']['baseurl'], config['auth']['token'])
-movies = plex.library.section('Movies')
-
-# Initialising eel library in this directory
-eel.init('web')
+_plex = None
+_movies = None
+_plex_error = None
+_chosen_movie = None
 
 
-def close_callback(path, list):
-    '''Exiting app when window is closed'''
-    print("Window closed... Aborting!")
-    sys.exit()
+def _connect_plex():
+    global _plex, _movies, _plex_error
+    try:
+        _plex = PlexServer(_config["auth"]["baseurl"], _config["auth"]["token"])
+        _movies = _plex.library.section("Movies")
+    except Exception as exc:
+        _plex_error = str(exc)
 
 
-def randomUnwatchedMovie():
-    '''Generates a list of unwatched movies. Randomly selects one to be displayed.
-    Pulls movie information and returns movie data for display'''
-
-    global chosen_movie
-    chosen_movie = choice(movies.search(unwatched=True))
-    chosen_movie_duration_hours = (chosen_movie.duration/(1000*60*60)) % 24
-    chosen_movie_duration_minutes = (chosen_movie.duration/(1000*60)) % 60
-
-    actors = [chosen_movie.actors[a].tag for a in range(
-        len(chosen_movie.actors))]
-    writers = [chosen_movie.writers[w].tag for w in range(
-        len(chosen_movie.writers))]
-    directors = [chosen_movie.directors[d].tag for d in range(
-        len(chosen_movie.directors))]
-
-    return {"title": chosen_movie.title,
-            "year": chosen_movie.year,
-            "duration_hours": int(chosen_movie_duration_hours),
-            "duration_minutes": int(chosen_movie_duration_minutes),
-            "directors": directors, "writers": writers, "actors": actors,
-            "poster": chosen_movie.posterUrl,
-            "background": chosen_movie.artUrl
-            }
+@app.route("/")
+def index():
+    return send_from_directory("web", "index.html")
 
 
-@ eel.expose
-def py_returnMovie():
-    '''Sends random movies attributes to JS'''
-    return randomUnwatchedMovie()
+@app.route("/api/movie")
+def get_movie():
+    if _plex_error:
+        return jsonify({"error": _plex_error}), 503
+    global _chosen_movie
+    unwatched = _movies.search(unwatched=True)
+    if not unwatched:
+        return jsonify({"error": "No unwatched movies in your library"}), 404
+    _chosen_movie = choice(unwatched)
+    hours = int((_chosen_movie.duration / (1000 * 60 * 60)) % 24)
+    minutes = int((_chosen_movie.duration / (1000 * 60)) % 60)
+    return jsonify({
+        "title": _chosen_movie.title,
+        "year": _chosen_movie.year,
+        "duration_hours": hours,
+        "duration_minutes": minutes,
+        "summary": _chosen_movie.summary,
+        "rating": _chosen_movie.audienceRating,
+        "genres": [g.tag for g in _chosen_movie.genres],
+        "directors": [d.tag for d in _chosen_movie.directors],
+        "writers": [w.tag for w in _chosen_movie.writers],
+        "actors": [a.tag for a in _chosen_movie.actors],
+        "poster": _chosen_movie.posterUrl,
+        "background": _chosen_movie.artUrl,
+    })
 
 
-@ eel.expose
-def py_returnClients():
-    '''Return list of clients to JS'''
-    clients = [client.title for client in plex.clients()]
-    return clients
+@app.route("/api/clients")
+def get_clients():
+    if _plex_error:
+        return jsonify({"error": _plex_error}), 503
+    try:
+        return jsonify({"clients": [c.title for c in _plex.clients()]})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
-@ eel.expose
-def py_playMovie(client):
-    '''Play movie if button was clicked and client was selected'''
-    plex.client(client).playMedia(chosen_movie)
+@app.route("/api/play", methods=["POST"])
+def play_movie():
+    if _plex_error:
+        return jsonify({"error": _plex_error}), 503
+    if _chosen_movie is None:
+        return jsonify({"error": "No movie selected — fetch a movie first"}), 400
+    data = request.get_json(silent=True) or {}
+    client_name = data.get("client")
+    if not client_name:
+        return jsonify({"error": "No client specified"}), 400
+    try:
+        _plex.client(client_name).playMedia(_chosen_movie)
+        return jsonify({"ok": True})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
-# If using custom path, start accordingly.
-if use_custom_path == True:
-    eel.browsers.set_path('chrome', filepath)
+def main():
+    _connect_plex()
+    port = 4000
+    threading.Timer(0.5, lambda: webbrowser.open(f"http://localhost:{port}")).start()
+    print(f"Random Plex Movie running at http://localhost:{port}")
+    app.run(port=port, debug=False)
 
-# Starting web server for app. Opening app window.
-eel.start('index.html',
-          browser='Chrome',
-          port=randint(49152, 65535),
-          close_callback=close_callback,
-          size=(1440, 860)
-          )
+
+if __name__ == "__main__":
+    main()
