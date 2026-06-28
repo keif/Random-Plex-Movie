@@ -5,6 +5,7 @@ Python app that picks a random unwatched movie from your Plex library and lets y
 [![GitHub Release](https://img.shields.io/github/v/release/Akasiek/Random-Plex-Movie?include_prereleases&label=Release&style=flat-square)](https://github.com/Akasiek/Random-Plex-Movie/releases)
 [![GitHub](https://img.shields.io/github/license/Akasiek/random-plex-movie?style=flat-square)](https://github.com/Akasiek/random-plex-movie/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/PlexAPI?label=PlexAPI&style=flat-square)](https://pypi.org/project/PlexAPI/)
+[![Docker Hub](https://img.shields.io/docker/v/ikeif/random-plex-movie?label=Docker%20Hub&style=flat-square)](https://hub.docker.com/r/ikeif/random-plex-movie)
 
 ![Example screenshot](https://i.imgur.com/CKplHDk.jpg)
 
