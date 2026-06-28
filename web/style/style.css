@@ -223,4 +223,92 @@ main {
     font-size: 14pt;
   }
 }
+/* Loading overlay */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #282A2D;
+    z-index: 200;
+}
+
+#loading-overlay.hidden {
+    display: none !important;
+}
+
+.spinner {
+    width: 56px;
+    height: 56px;
+    border: 5px solid #3A3C41;
+    border-top-color: #E5A00D;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error state */
+#error-state {
+    background-color: #3A3C41;
+    padding: 50px;
+    max-width: 600px;
+    text-align: center;
+}
+
+#error-message {
+    color: #E5A00D;
+    font-size: 1.1rem;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Genre tags */
+#genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.genre-tag {
+    background-color: #E5A00D;
+    color: #282A2D;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Rating */
+#rating {
+    color: #E5A00D;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin: 4px 0;
+}
+
+/* Summary */
+#summary {
+    color: #EAEAEC;
+    font-weight: 300;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 10px 0;
+    max-width: 600px;
+}
+
+/* No-clients message in prompt */
+.no-clients-msg {
+    color: #EAEAEC;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 1.1rem;
+    padding: 40px;
+    text-align: center;
+}
 /*# sourceMappingURL=style.css.map */
