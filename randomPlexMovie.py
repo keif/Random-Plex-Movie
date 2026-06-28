@@ -36,26 +36,29 @@ def get_movie():
     if _plex_error:
         return jsonify({"error": _plex_error}), 503
     global _chosen_movie
-    unwatched = _movies.search(unwatched=True)
-    if not unwatched:
-        return jsonify({"error": "No unwatched movies in your library"}), 404
-    _chosen_movie = choice(unwatched)
-    hours = int((_chosen_movie.duration / (1000 * 60 * 60)) % 24)
-    minutes = int((_chosen_movie.duration / (1000 * 60)) % 60)
-    return jsonify({
-        "title": _chosen_movie.title,
-        "year": _chosen_movie.year,
-        "duration_hours": hours,
-        "duration_minutes": minutes,
-        "summary": _chosen_movie.summary,
-        "rating": _chosen_movie.audienceRating,
-        "genres": [g.tag for g in _chosen_movie.genres],
-        "directors": [d.tag for d in _chosen_movie.directors],
-        "writers": [w.tag for w in _chosen_movie.writers],
-        "actors": [a.tag for a in _chosen_movie.actors],
-        "poster": _chosen_movie.posterUrl,
-        "background": _chosen_movie.artUrl,
-    })
+    try:
+        unwatched = _movies.search(unwatched=True)
+        if not unwatched:
+            return jsonify({"error": "No unwatched movies in your library"}), 404
+        _chosen_movie = choice(unwatched)
+        hours = int((_chosen_movie.duration / (1000 * 60 * 60)) % 24) if _chosen_movie.duration else 0
+        minutes = int((_chosen_movie.duration / (1000 * 60)) % 60) if _chosen_movie.duration else 0
+        return jsonify({
+            "title": _chosen_movie.title,
+            "year": _chosen_movie.year,
+            "duration_hours": hours,
+            "duration_minutes": minutes,
+            "summary": _chosen_movie.summary,
+            "rating": _chosen_movie.audienceRating,
+            "genres": [g.tag for g in _chosen_movie.genres],
+            "directors": [d.tag for d in _chosen_movie.directors],
+            "writers": [w.tag for w in _chosen_movie.writers],
+            "actors": [a.tag for a in _chosen_movie.actors],
+            "poster": _chosen_movie.posterUrl,
+            "background": _chosen_movie.artUrl,
+        })
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @app.route("/api/clients")
