@@ -1,70 +1,56 @@
 # Random Plex Movie
-Python App which chooses a random movie from your Plex Library. Also you can send a watch request to Plex Client with the chosen movie.
+
+Python app that picks a random unwatched movie from your Plex library and lets you send it to any active Plex client.
+
 [![GitHub Release](https://img.shields.io/github/v/release/Akasiek/Random-Plex-Movie?include_prereleases&label=Release&style=flat-square)](https://github.com/Akasiek/Random-Plex-Movie/releases)
 [![GitHub](https://img.shields.io/github/license/Akasiek/random-plex-movie?style=flat-square)](https://github.com/Akasiek/random-plex-movie/blob/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/PlexAPI?label=PlexAPI&style=flat-square)](https://pypi.org/project/PlexAPI/4.5.2/)
-[![PyPI](https://img.shields.io/pypi/v/Eel?label=Eel&style=flat-square)](https://pypi.org/project/Eel/)
+[![PyPI](https://img.shields.io/pypi/v/PlexAPI?label=PlexAPI&style=flat-square)](https://pypi.org/project/PlexAPI/)
 
-![alt text](https://i.imgur.com/CKplHDk.jpg "Example")
+![Example screenshot](https://i.imgur.com/CKplHDk.jpg)
 
-# Needed stuff
+## Requirements
 
-- Python 3
-- Pip
-- Google Chrome (You can access the app by any other browser on `localhost:4000`. But Chrome uses app module and it works out of the box)
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- A running Plex Media Server
 
-# Installation
+## Installation
 
-1. Clone repo with this command:
+1. Clone the repo:
 
-```
+```bash
 git clone https://github.com/Akasiek/Random-Plex-Movie.git
 cd Random-Plex-Movie
 ```
-    
 
-2. Install required libraries:
+2. Install dependencies:
 
-    Windows 
+```bash
+uv sync
+```
 
-    `pip install -r requirements.txt`
+3. Edit `config/config.ini` with your Plex credentials:
 
-    MacOS and Linux
+```ini
+[auth]
+baseurl = http://localhost:32400
+token = your-token-here
+```
 
-    `pip3 install -r requirements.txt`
+To find your token, see: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
 
-3. Change config file with your Plex credentials. 
+## Usage
 
-    ![alt text](https://i.imgur.com/Y7WjVLb.jpg "Third step of the installation")
+```bash
+uv run python randomPlexMovie.py
+```
 
-4. Run Python file with this command
+The app starts a local web server on port 4000 and opens your default browser automatically. Press **NEXT** to pick a new random movie, or **WATCH** to send the current movie to a connected Plex client.
 
-    Windows (CMD)
+## Development
 
-    `py randomPlexMovie.py`
+Run the test suite:
 
-    MacOS and Linux
-
-    `python3 randomPlexMovie.py`
-
-    This will start local web server on port 4000 and open Chrome App. If the port is colliding with something, you can change it in this line:
-
-    ![alt text](https://i.imgur.com/ABLhaJh.jpg "Fourth step of the installation")
-
-    After closing the app window, the program will stop running. You can change it by deleting argument "close_callback" in this line:
-
-    ![alt text](https://i.imgur.com/kcaZZgR.jpg "Fourth step of the installation")
-    
-    If you run into the `OSError: Can't find Google Chrome/Chromium installation` error, in the config file, change useCustomPath to `True` and specify the file path leading to your Chrome installation directory by changing `path`.
-    
-    ![alt text](https://i.imgur.com/wCoEHhh.png "Fourth step of the installation")
-
-***
-
-## Plans for the future
-
-- Login page for Plex credentials
-
-
-
-
+```bash
+uv run pytest
+```
