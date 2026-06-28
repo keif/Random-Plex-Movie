@@ -1,6 +1,7 @@
 services:
   random-plex-movie:
-    build: .
+    image: ikeif/random-plex-movie:latest
+    # build: .  # uncomment to build from source instead
     ports:
       - "4000:4000"
     environment:

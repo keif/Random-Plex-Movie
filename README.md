@@ -35,6 +35,8 @@ To find your token, see: https://support.plex.tv/articles/204059436-finding-an-a
 docker compose up -d
 ```
 
+The image is published on Docker Hub as [`ikeif/random-plex-movie`](https://hub.docker.com/r/ikeif/random-plex-movie). `docker-compose.yml` pulls it automatically — no local build required.
+
 Open `http://localhost:4000` in your browser.
 
 > **Linux users:** Uncomment the `extra_hosts` block in `docker-compose.yml` — Docker Desktop on macOS handles `host.docker.internal` automatically, but Linux needs it explicitly.
