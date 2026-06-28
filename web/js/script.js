@@ -100,13 +100,21 @@ document.getElementById("btn_watch").addEventListener("click", async () => {
                 const p = document.createElement("p");
                 p.textContent = name;
                 div.appendChild(p);
-                div.addEventListener("click", () => {
-                    fetch("/api/play", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ client: name }),
-                    });
+                div.addEventListener("click", async () => {
                     closeClientPrompt();
+                    try {
+                        const r = await fetch("/api/play", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ client: name }),
+                        });
+                        if (!r.ok) {
+                            const data = await r.json();
+                            showError(data.error || "Playback failed.");
+                        }
+                    } catch {
+                        showError("Could not reach the server.");
+                    }
                 });
                 listEl.appendChild(div);
             });

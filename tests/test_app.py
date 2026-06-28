@@ -100,6 +100,13 @@ class TestGetClients:
         r = client.get("/api/clients")
         assert r.status_code == 503
 
+    def test_exception_returns_500(self, client, mock_plex):
+        server, _ = mock_plex
+        server.clients.side_effect = Exception("network error")
+        r = client.get("/api/clients")
+        assert r.status_code == 500
+        assert r.get_json() == {"error": "Internal server error"}
+
 
 class TestPlayMovie:
     def test_plays_on_named_client(self, client, monkeypatch, mock_plex):
