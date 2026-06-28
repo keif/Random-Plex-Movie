@@ -74,6 +74,13 @@ class TestGetMovie:
         assert r.status_code == 503
         assert r.get_json()["error"] == "Connection refused"
 
+    def test_plex_exception_returns_500(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.side_effect = Exception("search failed")
+        r = client.get("/api/movie")
+        assert r.status_code == 500
+        assert "error" in r.get_json()
+
 
 class TestGetClients:
     def test_returns_client_names(self, client):
@@ -119,3 +126,11 @@ class TestPlayMovie:
         monkeypatch.setattr(mod, "_chosen_movie", _make_movie())
         r = client.post("/api/play", json={"client": "Living Room TV"})
         assert r.status_code == 503
+
+    def test_play_exception_returns_500(self, client, monkeypatch, mock_plex):
+        server, _ = mock_plex
+        monkeypatch.setattr(mod, "_chosen_movie", _make_movie())
+        server.client.return_value.playMedia.side_effect = Exception("play failed")
+        r = client.post("/api/play", json={"client": "Living Room TV"})
+        assert r.status_code == 500
+        assert "error" in r.get_json()

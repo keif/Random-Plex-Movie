@@ -1,78 +1,124 @@
-// Main function which displays all movie data in the app
-// window.onload makes sure the function is run when the app starts up
-window.onload = document.getElementById('btn_watch').onclick = async function showMovieInHTML() {
-    // Get movie data from python
-    var py_movie = await eel.py_returnMovie()();
+const sectionEl = document.getElementById("section");
+const loadingEl = document.getElementById("loading-overlay");
+const errorStateEl = document.getElementById("error-state");
+const errorMsgEl = document.getElementById("error-message");
 
-    // After loading all data, show content of the app
-    document.getElementById("section").classList.remove("hidden");
+async function loadMovie() {
+    sectionEl.classList.add("hidden");
+    errorStateEl.classList.add("hidden");
+    loadingEl.classList.remove("hidden");
 
+    try {
+        const res = await fetch("/api/movie");
+        const movie = await res.json();
+        if (!res.ok) {
+            showError(movie.error || "Failed to load a movie.");
+            return;
+        }
+        displayMovie(movie);
+        sectionEl.classList.remove("hidden");
+    } catch {
+        showError("Could not reach the server. Is the app running?");
+    } finally {
+        loadingEl.classList.add("hidden");
+    }
+}
 
-    // Changing data in HTML to movie details:
-    // Title
-    document.getElementById("title").innerHTML = py_movie["title"];
+function displayMovie(movie) {
+    document.getElementById("title").textContent = movie.title;
+    document.getElementById("year_duration").textContent =
+        `${movie.year}  |  ${movie.duration_hours}h ${movie.duration_minutes}m`;
 
-    // Year and duration
-    document.getElementById("year_duration").innerHTML = py_movie["year"] + " <span style=\"font-weight:300\">|</span> " + py_movie["duration_hours"] + "h" + " " + py_movie["duration_minutes"] + "m";
-
-    // Director/s
-    var directors_p = document.getElementById("directors");
-
-    directors_p.innerHTML = "<span style=\"font-weight:700\">Directed by:</span>";
-    py_movie["directors"].forEach(element => {
-        directors_p.innerHTML += " " + element + ", ";
+    const genresEl = document.getElementById("genres");
+    genresEl.textContent = "";
+    (movie.genres || []).forEach(g => {
+        const span = document.createElement("span");
+        span.className = "genre-tag";
+        span.textContent = g;
+        genresEl.appendChild(span);
     });
-    directors_p.innerHTML = directors_p.innerHTML.replace(/(\s+)?..$/, '');
 
-    // Writer/s
-    var writers_p = document.getElementById("writers");
+    const ratingEl = document.getElementById("rating");
+    ratingEl.textContent = movie.rating ? `★ ${movie.rating} / 10` : "";
 
-    writers_p.innerHTML = "<span style=\"font-weight:700\">Written by:</span>";
-    py_movie["writers"].forEach(element => {
-        writers_p.innerHTML += " " + element + ", ";
-    });
-    writers_p.innerHTML = writers_p.innerHTML.replace(/(\s+)?..$/, '');
+    document.getElementById("summary").textContent = movie.summary || "";
 
-    // Actors
-    var actors_p = document.getElementById("actors");
+    setCrewLine("directors", "Directed by", movie.directors);
+    setCrewLine("writers", "Written by", movie.writers);
+    setCrewLine("actors", "Cast", movie.actors);
 
-    actors_p.innerHTML = "<span style=\"font-weight:700\">Cast:</span>";
-    py_movie["actors"].forEach(element => {
-        actors_p.innerHTML += " " + element + ", ";
-    });
-    actors_p.innerHTML = actors_p.innerHTML.replace(/(\s+)?..$/, '');
+    const posterEl = document.getElementById("poster_img");
+    posterEl.src = movie.poster || "";
+    posterEl.alt = movie.title;
 
-    // Poster
-    document.getElementById("poster_img").src = py_movie["poster"];
+    const bgEl = document.getElementById("img_background");
+    bgEl.style.backgroundImage = movie.background ? `url(${movie.background})` : "none";
+}
 
-    // BG Art
-    document.getElementById("img_background").style.background = 'url(' + py_movie["background"] + ')';
-};
+function setCrewLine(id, label, names) {
+    const el = document.getElementById(id);
+    el.textContent = "";
+    if (!names || names.length === 0) return;
+    const bold = document.createElement("span");
+    bold.style.fontWeight = "700";
+    bold.textContent = `${label}: `;
+    el.appendChild(bold);
+    el.appendChild(document.createTextNode(names.join(", ")));
+}
 
+function showError(msg) {
+    errorMsgEl.textContent = msg;
+    errorStateEl.classList.remove("hidden");
+    loadingEl.classList.add("hidden");
+    sectionEl.classList.add("hidden");
+}
 
-// This sections makes the "WATCH" button work...
-// Hides client prompt
 function closeClientPrompt() {
     document.getElementById("client_prompt").classList.add("hidden");
 }
 
-// Takes list of clients and display them as options for choosing where to watch content
-document.getElementById("btn_next_movie").addEventListener("click", async function() {
-    // Get list of clients from python
-    var clients = await eel.py_returnClients()();
+document.getElementById("btn_next").addEventListener("click", loadMovie);
 
-    // Clear the list of clients
-    list_of_clients.innerHTML = "";
-    // Make client prompt visible
+document.getElementById("btn_watch").addEventListener("click", async () => {
+    const listEl = document.getElementById("list_of_clients");
+    listEl.textContent = "";
+
+    try {
+        const res = await fetch("/api/clients");
+        const data = await res.json();
+        const clients = data.clients || [];
+
+        if (clients.length === 0) {
+            const msg = document.createElement("p");
+            msg.className = "no-clients-msg";
+            msg.textContent = "No Plex clients are currently online.";
+            listEl.appendChild(msg);
+        } else {
+            clients.forEach(name => {
+                const div = document.createElement("div");
+                div.className = "client";
+                const p = document.createElement("p");
+                p.textContent = name;
+                div.appendChild(p);
+                div.addEventListener("click", () => {
+                    fetch("/api/play", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ client: name }),
+                    });
+                    closeClientPrompt();
+                });
+                listEl.appendChild(div);
+            });
+        }
+    } catch {
+        const msg = document.createElement("p");
+        msg.className = "no-clients-msg";
+        msg.textContent = "Could not fetch client list.";
+        listEl.appendChild(msg);
+    }
+
     document.getElementById("client_prompt").classList.remove("hidden");
-
-    // For each client make new div
-    clients.forEach(client => {
-        document.getElementById("list_of_clients").innerHTML += "<div class=\"client\" onclick=\"playMovie('" + client + "');closeClientPrompt()\"><p>" + client + "</p></div>";
-    });
 });
 
-function playMovie(client) {
-    // Does what the name says...
-    eel.py_playMovie(client);
-}
+loadMovie();
