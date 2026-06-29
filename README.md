@@ -20,15 +20,19 @@ git clone https://github.com/Akasiek/Random-Plex-Movie.git
 cd Random-Plex-Movie
 ```
 
-2. Set your Plex token in `docker-compose.yml`:
+2. Create a `.env` file from the example and add your Plex token:
 
-```yaml
-environment:
-  PLEX_URL: http://host.docker.internal:32400
-  PLEX_TOKEN: your-token-here
+```bash
+cp .env.example .env
+```
+
+```ini
+PLEX_TOKEN=your-token-here
 ```
 
 To find your token, see: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+
+`.env` is gitignored — your token will never be accidentally committed.
 
 3. Start the container:
 
