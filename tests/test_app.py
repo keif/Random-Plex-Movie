@@ -19,12 +19,19 @@ def _make_movie():
     return m
 
 
+def _make_session(title):
+    session = MagicMock()
+    session.player.title = title
+    return session
+
+
 @pytest.fixture(autouse=True)
 def mock_plex(monkeypatch):
     server = MagicMock()
     section = MagicMock()
     section.search.return_value = [_make_movie()]
     server.clients.return_value = [MagicMock(title="Living Room TV")]
+    server.sessions.return_value = []
     monkeypatch.setattr(mod, "_plex", server)
     monkeypatch.setattr(mod, "_movies", section)
     monkeypatch.setattr(mod, "_plex_error", None)
@@ -118,6 +125,21 @@ class TestGetClients:
         r = client.get("/api/clients")
         assert r.status_code == 200
         assert r.get_json() == {"clients": []}
+
+    def test_includes_session_players(self, client, mock_plex):
+        server, _ = mock_plex
+        server.clients.return_value = []
+        server.sessions.return_value = [_make_session("Plex Web — Chrome")]
+        r = client.get("/api/clients")
+        assert r.status_code == 200
+        assert r.get_json() == {"clients": ["Plex Web — Chrome"]}
+
+    def test_deduplicates_gdm_and_session_clients(self, client, mock_plex):
+        server, _ = mock_plex
+        server.sessions.return_value = [_make_session("Living Room TV")]
+        r = client.get("/api/clients")
+        assert r.status_code == 200
+        assert r.get_json() == {"clients": ["Living Room TV"]}
 
     def test_plex_error_returns_503(self, client, monkeypatch):
         monkeypatch.setattr(mod, "_plex_error", "Connection refused")

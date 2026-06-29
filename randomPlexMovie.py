@@ -92,7 +92,18 @@ def get_clients():
     if _plex_error:
         return jsonify({"error": _plex_error}), 503
     try:
-        return jsonify({"clients": [c.title for c in _plex.clients()]})
+        seen = set()
+        clients = []
+        for c in _plex.clients():
+            if c.title not in seen:
+                seen.add(c.title)
+                clients.append(c.title)
+        for session in _plex.sessions():
+            title = session.player.title
+            if title not in seen:
+                seen.add(title)
+                clients.append(title)
+        return jsonify({"clients": clients})
     except Exception:
         app.logger.exception("get_clients failed")
         return jsonify({"error": "Internal server error"}), 500
