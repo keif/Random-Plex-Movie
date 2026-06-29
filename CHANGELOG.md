@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-06-28
+
+### Added
+- GitHub Action to automatically build and push to Docker Hub on release
+- Docker Hub badge in README
+
+### Changed
+- `docker-compose.yml` now pulls `ikeif/random-plex-movie:latest` from Docker Hub instead of building from source
+
 ## [2.1.0] - 2026-06-28
 
 ### Added
@@ -46,6 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/keif/Random-Plex-Movie/releases/tag/v2.0.0
