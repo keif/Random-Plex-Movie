@@ -51,6 +51,14 @@ class TestProxyImage:
         r = client.get("/api/image?path=/etc/passwd")
         assert r.status_code == 400
 
+    def test_rejects_path_traversal(self, client):
+        r = client.get("/api/image?path=/library/../../etc/passwd")
+        assert r.status_code == 400
+
+    def test_rejects_path_with_query_string(self, client):
+        r = client.get("/api/image?path=/library/metadata/1/thumb/123?injected=1")
+        assert r.status_code == 400
+
     def test_proxies_library_path(self, client, monkeypatch):
         mock_resp = MagicMock()
         mock_resp.read.return_value = b"IMGDATA"

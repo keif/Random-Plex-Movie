@@ -4,7 +4,7 @@ import re
 import threading
 import webbrowser
 from random import choice
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 from plexapi.server import PlexServer
@@ -46,13 +46,17 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+_PLEX_IMAGE_RE = re.compile(r"^/library/(metadata|parts)/\d+/(thumb|art)/\d+$")
+
+
 @app.route("/api/image")
 def proxy_image():
     path = request.args.get("path", "")
-    if not path.startswith("/library/"):
+    if not _PLEX_IMAGE_RE.match(path):
         return "", 400
     try:
-        with urlopen(f"{_plex_url}{path}?X-Plex-Token={_plex_token}", timeout=10) as r:
+        req = Request(f"{_plex_url}{path}", headers={"X-Plex-Token": _plex_token})
+        with urlopen(req, timeout=10) as r:
             return Response(r.read(), content_type=r.headers.get("Content-Type", "image/jpeg"))
     except Exception:
         app.logger.exception("proxy_image failed")
