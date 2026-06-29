@@ -1,6 +1,8 @@
 # Random Plex Movie
 
-Python app that picks a random unwatched movie from your Plex library and lets you send it to any active Plex client.
+A companion web app that picks a random unwatched movie from your Plex library and sends it to any active Plex client.
+
+It runs alongside Plex as a separate page at `http://localhost:4000` — not inside the Plex UI. Hit **NEXT** to pick a random movie, then **WATCH** to start playback on any connected client (Apple TV, Plex app on your TV, etc.).
 
 [![GitHub Release](https://img.shields.io/github/v/release/Akasiek/Random-Plex-Movie?include_prereleases&label=Release&style=flat-square)](https://github.com/Akasiek/Random-Plex-Movie/releases)
 [![GitHub](https://img.shields.io/github/license/Akasiek/random-plex-movie?style=flat-square)](https://github.com/Akasiek/random-plex-movie/blob/main/LICENSE)
