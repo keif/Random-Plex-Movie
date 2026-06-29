@@ -14,8 +14,8 @@ def _make_movie():
     m.directors = [MagicMock(tag="Lana Wachowski")]
     m.writers = [MagicMock(tag="Lilly Wachowski")]
     m.actors = [MagicMock(tag="Keanu Reeves"), MagicMock(tag="Laurence Fishburne")]
-    m.posterUrl = "http://plex.local/poster.jpg"
-    m.artUrl = "http://plex.local/art.jpg"
+    m.thumb = "/library/metadata/1/thumb/123"
+    m.art = "/library/metadata/1/art/456"
     return m
 
 
@@ -44,6 +44,28 @@ def client():
     mod.app.config["TESTING"] = True
     with mod.app.test_client() as c:
         yield c
+
+
+class TestProxyImage:
+    def test_rejects_non_library_path(self, client):
+        r = client.get("/api/image?path=/etc/passwd")
+        assert r.status_code == 400
+
+    def test_proxies_library_path(self, client, monkeypatch):
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = b"IMGDATA"
+        mock_resp.headers.get.return_value = "image/jpeg"
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = MagicMock(return_value=False)
+        monkeypatch.setattr(mod, "urlopen", lambda *a, **kw: mock_resp)
+        r = client.get("/api/image?path=/library/metadata/1/thumb/123")
+        assert r.status_code == 200
+        assert r.data == b"IMGDATA"
+
+    def test_returns_502_on_fetch_failure(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "urlopen", lambda *a, **kw: (_ for _ in ()).throw(Exception("timeout")))
+        r = client.get("/api/image?path=/library/metadata/1/thumb/123")
+        assert r.status_code == 502
 
 
 class TestGetStatus:
@@ -85,8 +107,8 @@ class TestGetMovie:
         assert data["directors"] == ["Lana Wachowski"]
         assert data["writers"] == ["Lilly Wachowski"]
         assert data["actors"] == ["Keanu Reeves", "Laurence Fishburne"]
-        assert data["poster"] == "http://plex.local/poster.jpg"
-        assert data["background"] == "http://plex.local/art.jpg"
+        assert data["poster"] == "/api/image?path=/library/metadata/1/thumb/123"
+        assert data["background"] == "/api/image?path=/library/metadata/1/art/456"
 
     def test_sets_chosen_movie_global(self, client):
         client.get("/api/movie")

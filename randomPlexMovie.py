@@ -4,8 +4,9 @@ import re
 import threading
 import webbrowser
 from random import choice
+from urllib.request import urlopen
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 from plexapi.server import PlexServer
 
 app = Flask(__name__, static_folder="web", static_url_path="")
@@ -45,6 +46,19 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+@app.route("/api/image")
+def proxy_image():
+    path = request.args.get("path", "")
+    if not path.startswith("/library/"):
+        return "", 400
+    try:
+        with urlopen(f"{_plex_url}{path}?X-Plex-Token={_plex_token}", timeout=10) as r:
+            return Response(r.read(), content_type=r.headers.get("Content-Type", "image/jpeg"))
+    except Exception:
+        app.logger.exception("proxy_image failed")
+        return "", 502
+
+
 @app.route("/api/status")
 def get_status():
     if _plex_error:
@@ -79,8 +93,8 @@ def get_movie():
             "directors": [d.tag for d in _chosen_movie.directors],
             "writers": [w.tag for w in _chosen_movie.writers],
             "actors": [a.tag for a in _chosen_movie.actors],
-            "poster": _chosen_movie.posterUrl,
-            "background": _chosen_movie.artUrl,
+            "poster": f"/api/image?path={_chosen_movie.thumb}" if _chosen_movie.thumb else None,
+            "background": f"/api/image?path={_chosen_movie.art}" if _chosen_movie.art else None,
         })
     except Exception:
         app.logger.exception("get_movie failed")
