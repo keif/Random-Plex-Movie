@@ -129,4 +129,22 @@ document.getElementById("btn_watch").addEventListener("click", async () => {
     document.getElementById("client_prompt").classList.remove("hidden");
 });
 
+async function checkPlexStatus() {
+    const badge = document.getElementById("plex-status");
+    try {
+        const res = await fetch("/api/status");
+        const data = await res.json();
+        badge.classList.toggle("online", data.ok);
+        badge.classList.toggle("offline", !data.ok);
+        badge.title = data.ok ? "Plex is reachable" : (data.error || "Plex is unreachable");
+    } catch {
+        badge.classList.remove("online");
+        badge.classList.add("offline");
+        badge.title = "Could not reach app server";
+    }
+}
+
+checkPlexStatus();
+setInterval(checkPlexStatus, 60000);
+
 loadMovie();

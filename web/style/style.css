@@ -223,6 +223,36 @@ main {
     font-size: 14pt;
   }
 }
+/* Plex status badge */
+#plex-status {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(40, 42, 45, 0.85);
+    padding: 6px 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #EAEAEC;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: default;
+}
+
+#plex-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #666;
+}
+
+#plex-status.online #plex-status-dot  { background-color: #4CAF50; }
+#plex-status.offline #plex-status-dot { background-color: #E53935; }
+
 /* Loading overlay */
 #loading-overlay {
     position: fixed;

@@ -39,6 +39,30 @@ def client():
         yield c
 
 
+class TestGetStatus:
+    def test_ok_when_plex_reachable(self, client):
+        r = client.get("/api/status")
+        assert r.status_code == 200
+        assert r.get_json() == {"ok": True}
+
+    def test_not_ok_when_plex_error(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        r = client.get("/api/status")
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data["ok"] is False
+        assert "error" in data
+
+    def test_not_ok_when_query_raises(self, client, mock_plex):
+        server, _ = mock_plex
+        server.query.side_effect = Exception("timeout")
+        r = client.get("/api/status")
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data["ok"] is False
+        assert "error" in data
+
+
 class TestGetMovie:
     def test_returns_full_movie_data(self, client):
         r = client.get("/api/movie")

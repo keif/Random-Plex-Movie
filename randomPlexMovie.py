@@ -45,6 +45,17 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+@app.route("/api/status")
+def get_status():
+    if _plex_error:
+        return jsonify({"ok": False, "error": _plex_error})
+    try:
+        _plex.query("/")
+        return jsonify({"ok": True})
+    except Exception:
+        return jsonify({"ok": False, "error": "Plex is unreachable"})
+
+
 @app.route("/api/movie")
 def get_movie():
     if _plex_error:
