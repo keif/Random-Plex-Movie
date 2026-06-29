@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-06-29
+
+### Added
+- Plex status badge in the top-right corner — green/red dot with 60-second live polling
+
+### Fixed
+- Plex Web and other browser-based clients now appear in the client list (previously only GDM-discovered native clients were shown)
+- Poster and backdrop images now load correctly when running in Docker — images are proxied through Flask instead of being fetched directly from the Plex URL, which was unreachable from the browser inside Docker
+
+### Security
+- Image proxy path restricted to a strict regex (`/library/(metadata|parts)/<id>/(thumb|art)/<id>`) to prevent path traversal
+- Plex token passed via header instead of query string in server-side image requests
+
 ## [2.1.2] - 2026-06-29
 
 ### Security
@@ -64,7 +77,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.0.0...v2.1.0
