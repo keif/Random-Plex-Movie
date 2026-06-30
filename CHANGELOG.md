@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-06-30
+
+### Added
+- `PLEX_LIBRARY` environment variable and `[auth] library` config.ini key to configure the Plex library name (default: `Movies`)
+
 ## [2.2.1] - 2026-06-30
 
 ### Fixed
@@ -83,7 +88,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...HEAD
+[2.2.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.1...v2.1.2
