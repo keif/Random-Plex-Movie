@@ -11,6 +11,7 @@ It runs alongside Plex as a separate page at `http://localhost:4000` — not ins
 
 ![Example selection screenshot](/screenshot.png)
 ![Example agent selection screenshot](/agents.png)
+![Filter panel screenshot](/filters.png)
 
 ## Running with Docker
 
@@ -85,6 +86,8 @@ uv run python randomPlexMovie.py
 ```
 
 The app starts on port 4000 and opens your default browser automatically. Press **NEXT** to pick a new random movie, or **WATCH** to send the current movie to a connected Plex client.
+
+Use the **FILTERS** button to narrow picks by genre, year range, or minimum rating. Active filters are shown as a count on the button and persist across NEXT picks until cleared.
 
 ## Configuration
 
