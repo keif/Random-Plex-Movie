@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-06-30
+
+### Added
+- Genre, year range, and minimum rating filters — a **FILTERS** button below NEXT/WATCH opens a panel populated from your unwatched library; active filter count shown on the button; NEXT respects all active filters
+
 ## [2.2.2] - 2026-06-30
 
 ### Added
@@ -88,7 +93,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.1.2...v2.2.0
