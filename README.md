@@ -9,7 +9,8 @@ It runs alongside Plex as a separate page at `http://localhost:4000` — not ins
 [![PyPI](https://img.shields.io/pypi/v/PlexAPI?label=PlexAPI&style=flat-square)](https://pypi.org/project/PlexAPI/)
 [![Docker Hub](https://img.shields.io/docker/v/ikeif/random-plex-movie?label=Docker%20Hub&style=flat-square)](https://hub.docker.com/r/ikeif/random-plex-movie)
 
-![Example screenshot](https://i.imgur.com/CKplHDk.jpg)
+![Example selection screenshot](/screenshot.png)
+![Example agent selection screenshot](/agents.png)
 
 ## Running with Docker
 
