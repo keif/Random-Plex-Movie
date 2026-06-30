@@ -3,14 +3,14 @@ from unittest.mock import MagicMock
 import randomPlexMovie as mod
 
 
-def _make_movie():
+def _make_movie(title="The Matrix", year=1999, rating=8.7, genres=("Action", "Sci-Fi")):
     m = MagicMock()
-    m.title = "The Matrix"
-    m.year = 1999
+    m.title = title
+    m.year = year
     m.duration = 8160000  # 2h 16m in ms
     m.summary = "A hacker discovers reality is a simulation."
-    m.audienceRating = 8.7
-    m.genres = [MagicMock(tag="Action"), MagicMock(tag="Sci-Fi")]
+    m.audienceRating = rating
+    m.genres = [MagicMock(tag=g) for g in genres]
     m.directors = [MagicMock(tag="Lana Wachowski")]
     m.writers = [MagicMock(tag="Lilly Wachowski")]
     m.actors = [MagicMock(tag="Keanu Reeves"), MagicMock(tag="Laurence Fishburne")]
@@ -45,6 +45,82 @@ def client():
     mod.app.config["TESTING"] = True
     with mod.app.test_client() as c:
         yield c
+
+
+class TestGetFilters:
+    def test_returns_genres_and_year_range(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [
+            _make_movie(year=1985, genres=("Horror",)),
+            _make_movie(year=2001, genres=("Comedy", "Horror")),
+        ]
+        r = client.get("/api/filters")
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data["genres"] == ["Comedy", "Horror"]
+        assert data["year_min"] == 1985
+        assert data["year_max"] == 2001
+
+    def test_plex_error_returns_503(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        r = client.get("/api/filters")
+        assert r.status_code == 503
+
+
+class TestGetMovieFilters:
+    def test_genre_filter(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [
+            _make_movie(title="Horror Film", genres=("Horror",)),
+            _make_movie(title="The Matrix", genres=("Action",)),
+        ]
+        r = client.get("/api/movie?genre=Horror")
+        assert r.status_code == 200
+        assert r.get_json()["title"] == "Horror Film"
+
+    def test_year_min_filter(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [
+            _make_movie(title="Old Film", year=1975),
+            _make_movie(title="New Film", year=2010),
+        ]
+        r = client.get("/api/movie?year_min=2000")
+        assert r.status_code == 200
+        assert r.get_json()["title"] == "New Film"
+
+    def test_year_max_filter(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [
+            _make_movie(title="Old Film", year=1975),
+            _make_movie(title="New Film", year=2010),
+        ]
+        r = client.get("/api/movie?year_max=1999")
+        assert r.status_code == 200
+        assert r.get_json()["title"] == "Old Film"
+
+    def test_rating_min_filter(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [
+            _make_movie(title="Low Rated", rating=4.0),
+            _make_movie(title="High Rated", rating=9.0),
+        ]
+        r = client.get("/api/movie?rating_min=8.0")
+        assert r.status_code == 200
+        assert r.get_json()["title"] == "High Rated"
+
+    def test_no_matches_returns_404_with_filter_message(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [_make_movie(genres=("Comedy",))]
+        r = client.get("/api/movie?genre=Horror")
+        assert r.status_code == 404
+        assert "filters" in r.get_json()["error"]
+
+    def test_empty_library_returns_404_without_filter_message(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = []
+        r = client.get("/api/movie")
+        assert r.status_code == 404
+        assert "filters" not in r.get_json()["error"]
 
 
 class TestConnectPlex:

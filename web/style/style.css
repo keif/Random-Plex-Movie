@@ -253,6 +253,97 @@ main {
 #plex-status.online #plex-status-dot  { background-color: #4CAF50; }
 #plex-status.offline #plex-status-dot { background-color: #E53935; }
 
+/* Filter toggle bar */
+#filter_toggle_bar {
+    z-index: 20;
+    margin-top: 8px;
+}
+
+#btn_filters {
+    background: transparent;
+    border: 2px solid #E5A00D;
+    color: #E5A00D;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.8em;
+    padding: 6px 22px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+}
+
+#btn_filters:active {
+    background-color: rgba(229, 160, 13, 0.15);
+}
+
+/* Filter panel */
+#filter_panel {
+    z-index: 20;
+    background-color: rgba(30, 32, 35, 0.95);
+    padding: 16px 24px;
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.filter_row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter_row label {
+    color: #EAEAEC;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.filter_row select,
+.filter_row input[type="number"] {
+    background-color: #3A3C41;
+    border: 1px solid #555;
+    color: #EAEAEC;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+}
+
+.filter_row select { min-width: 140px; }
+.filter_row input[type="number"] { width: 80px; }
+
+.filter_year_range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter_sep {
+    color: #EAEAEC;
+    font-weight: 700;
+}
+
+#btn_clear_filters {
+    background: transparent;
+    border: 1px solid #555;
+    color: #888;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.75em;
+    padding: 7px 16px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+}
+
+#btn_clear_filters:hover {
+    border-color: #E5A00D;
+    color: #E5A00D;
+}
+
 /* Loading overlay */
 #loading-overlay {
     position: fixed;

@@ -75,15 +75,46 @@ def get_status():
         return jsonify({"ok": False, "error": "Plex is unreachable"})
 
 
+@app.route("/api/filters")
+def get_filters():
+    if _plex_error:
+        return jsonify({"error": _plex_error}), 503
+    try:
+        unwatched = _movies.search(unwatched=True)
+        genres = sorted({g.tag for m in unwatched for g in m.genres})
+        years = [m.year for m in unwatched if m.year]
+        return jsonify({
+            "genres": genres,
+            "year_min": min(years) if years else None,
+            "year_max": max(years) if years else None,
+        })
+    except Exception:
+        app.logger.exception("get_filters failed")
+        return jsonify({"error": "Internal server error"}), 500
+
+
 @app.route("/api/movie")
 def get_movie():
     if _plex_error:
         return jsonify({"error": _plex_error}), 503
+    genre = request.args.get("genre", "").strip()
+    year_min = request.args.get("year_min", type=int)
+    year_max = request.args.get("year_max", type=int)
+    rating_min = request.args.get("rating_min", type=float)
     global _chosen_movie
     try:
         unwatched = _movies.search(unwatched=True)
+        if genre:
+            unwatched = [m for m in unwatched if any(g.tag == genre for g in m.genres)]
+        if year_min is not None:
+            unwatched = [m for m in unwatched if m.year and m.year >= year_min]
+        if year_max is not None:
+            unwatched = [m for m in unwatched if m.year and m.year <= year_max]
+        if rating_min is not None:
+            unwatched = [m for m in unwatched if m.audienceRating and m.audienceRating >= rating_min]
         if not unwatched:
-            return jsonify({"error": "No unwatched movies in your library"}), 404
+            msg = "No unwatched movies match your filters" if any([genre, year_min, year_max, rating_min]) else "No unwatched movies in your library"
+            return jsonify({"error": msg}), 404
         _chosen_movie = choice(unwatched)
         hours = int((_chosen_movie.duration / (1000 * 60 * 60)) % 24) if _chosen_movie.duration else 0
         minutes = int((_chosen_movie.duration / (1000 * 60)) % 60) if _chosen_movie.duration else 0

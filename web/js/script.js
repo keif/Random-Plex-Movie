@@ -3,13 +3,52 @@ const loadingEl = document.getElementById("loading-overlay");
 const errorStateEl = document.getElementById("error-state");
 const errorMsgEl = document.getElementById("error-message");
 
+const filterState = { genre: "", year_min: null, year_max: null, rating_min: null };
+
+function activeFilterCount() {
+    return [filterState.genre, filterState.year_min, filterState.year_max, filterState.rating_min]
+        .filter(v => v !== "" && v !== null).length;
+}
+
+function updateFilterButton() {
+    const count = activeFilterCount();
+    document.getElementById("btn_filters").textContent = count > 0 ? `FILTERS (${count})` : "FILTERS";
+}
+
+function buildMovieUrl() {
+    const params = new URLSearchParams();
+    if (filterState.genre) params.set("genre", filterState.genre);
+    if (filterState.year_min !== null) params.set("year_min", filterState.year_min);
+    if (filterState.year_max !== null) params.set("year_max", filterState.year_max);
+    if (filterState.rating_min !== null) params.set("rating_min", filterState.rating_min);
+    const qs = params.toString();
+    return qs ? `/api/movie?${qs}` : "/api/movie";
+}
+
+async function loadFilters() {
+    try {
+        const res = await fetch("/api/filters");
+        if (!res.ok) return;
+        const data = await res.json();
+        const select = document.getElementById("filter_genre");
+        (data.genres || []).forEach(g => {
+            const opt = document.createElement("option");
+            opt.value = g;
+            opt.textContent = g;
+            select.appendChild(opt);
+        });
+        if (data.year_min) document.getElementById("filter_year_min").placeholder = data.year_min;
+        if (data.year_max) document.getElementById("filter_year_max").placeholder = data.year_max;
+    } catch { /* non-critical — filters still usable without placeholder hints */ }
+}
+
 async function loadMovie() {
     sectionEl.classList.add("hidden");
     errorStateEl.classList.add("hidden");
     loadingEl.classList.remove("hidden");
 
     try {
-        const res = await fetch("/api/movie");
+        const res = await fetch(buildMovieUrl());
         const movie = await res.json();
         if (!res.ok) {
             showError(movie.error || "Failed to load a movie.");
@@ -147,4 +186,41 @@ async function checkPlexStatus() {
 checkPlexStatus();
 setInterval(checkPlexStatus, 60000);
 
+document.getElementById("btn_filters").addEventListener("click", () => {
+    document.getElementById("filter_panel").classList.toggle("hidden");
+});
+
+document.getElementById("filter_genre").addEventListener("change", e => {
+    filterState.genre = e.target.value;
+    updateFilterButton();
+});
+
+document.getElementById("filter_year_min").addEventListener("change", e => {
+    filterState.year_min = e.target.value ? parseInt(e.target.value) : null;
+    updateFilterButton();
+});
+
+document.getElementById("filter_year_max").addEventListener("change", e => {
+    filterState.year_max = e.target.value ? parseInt(e.target.value) : null;
+    updateFilterButton();
+});
+
+document.getElementById("filter_rating_min").addEventListener("change", e => {
+    filterState.rating_min = e.target.value ? parseFloat(e.target.value) : null;
+    updateFilterButton();
+});
+
+document.getElementById("btn_clear_filters").addEventListener("click", () => {
+    filterState.genre = "";
+    filterState.year_min = null;
+    filterState.year_max = null;
+    filterState.rating_min = null;
+    document.getElementById("filter_genre").value = "";
+    document.getElementById("filter_year_min").value = "";
+    document.getElementById("filter_year_max").value = "";
+    document.getElementById("filter_rating_min").value = "";
+    updateFilterButton();
+});
+
+loadFilters();
 loadMovie();
