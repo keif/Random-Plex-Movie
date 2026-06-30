@@ -36,6 +36,7 @@ def mock_plex(monkeypatch):
     monkeypatch.setattr(mod, "_movies", section)
     monkeypatch.setattr(mod, "_plex_error", None)
     monkeypatch.setattr(mod, "_chosen_movie", None)
+    monkeypatch.setattr(mod, "_plex_library", "Movies")
     return server, section
 
 
@@ -44,6 +45,16 @@ def client():
     mod.app.config["TESTING"] = True
     with mod.app.test_client() as c:
         yield c
+
+
+class TestConnectPlex:
+    def test_uses_configured_library_name(self, monkeypatch):
+        server = MagicMock()
+        monkeypatch.setattr(mod, "_plex_library", "4K Movies")
+        monkeypatch.setattr(mod, "_plex_error", None)
+        monkeypatch.setattr("randomPlexMovie.PlexServer", lambda *a, **kw: server)
+        mod._connect_plex()
+        server.library.section.assert_called_once_with("4K Movies")
 
 
 class TestProxyImage:

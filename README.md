@@ -94,6 +94,7 @@ Settings are read from `config/config.ini`. Environment variables take precedenc
 |---|---|---|
 | `PLEX_URL` | `[auth] baseurl` | `http://localhost:32400` |
 | `PLEX_TOKEN` | `[auth] token` | _(none)_ |
+| `PLEX_LIBRARY` | `[auth] library` | `Movies` |
 
 ## Development
 

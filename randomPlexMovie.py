@@ -17,6 +17,7 @@ _config.read("config/config.ini")
 # Env vars take precedence over config.ini (useful for Docker)
 _plex_url = os.environ.get("PLEX_URL") or _config.get("auth", "baseurl", fallback="http://localhost:32400")
 _plex_token = os.environ.get("PLEX_TOKEN") or _config.get("auth", "token", fallback="")
+_plex_library = os.environ.get("PLEX_LIBRARY") or _config.get("auth", "library", fallback="Movies")
 
 _plex = None
 _movies = None
@@ -36,7 +37,7 @@ def _connect_plex():
     global _plex, _movies, _plex_error
     try:
         _plex = PlexServer(_plex_url, _plex_token)
-        _movies = _plex.library.section("Movies")
+        _movies = _plex.library.section(_plex_library)
     except Exception as exc:
         _plex_error = _scrub_token(exc)
 
