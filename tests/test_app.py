@@ -163,6 +163,26 @@ class TestProxyImage:
         assert r.status_code == 502
 
 
+class TestHealth:
+    def test_ok_when_plex_reachable(self, client):
+        r = client.get("/health")
+        assert r.status_code == 200
+        assert r.get_json() == {"ok": True}
+
+    def test_503_when_plex_error(self, client, monkeypatch):
+        monkeypatch.setattr(mod, "_plex_error", "Connection refused")
+        r = client.get("/health")
+        assert r.status_code == 503
+        assert r.get_json()["ok"] is False
+
+    def test_503_when_query_raises(self, client, mock_plex):
+        server, _ = mock_plex
+        server.query.side_effect = Exception("timeout")
+        r = client.get("/health")
+        assert r.status_code == 503
+        assert r.get_json()["ok"] is False
+
+
 class TestGetStatus:
     def test_ok_when_plex_reachable(self, client):
         r = client.get("/api/status")

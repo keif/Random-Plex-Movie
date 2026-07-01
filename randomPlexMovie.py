@@ -64,6 +64,17 @@ def proxy_image():
         return "", 502
 
 
+@app.route("/health")
+def health():
+    if _plex_error:
+        return jsonify({"ok": False, "error": _plex_error}), 503
+    try:
+        _plex.query("/")
+        return jsonify({"ok": True})
+    except Exception:
+        return jsonify({"ok": False, "error": "Plex is unreachable"}), 503
+
+
 @app.route("/api/status")
 def get_status():
     if _plex_error:
