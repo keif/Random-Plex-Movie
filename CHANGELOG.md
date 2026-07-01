@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-01
+
+### Added
+- **Unwatched only** toggle in the filter panel — checked by default; uncheck to include already-watched movies in the random selection
+
 ## [2.3.2] - 2026-07-01
 
 ### Added
@@ -104,7 +109,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.2...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...v2.3.0
