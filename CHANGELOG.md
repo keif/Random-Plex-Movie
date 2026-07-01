@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-06-30
+
+### Changed
+- Docker image now built for `linux/amd64` and `linux/arm64` — runs natively on ARM devices (NAS, Raspberry Pi, Apple Silicon)
+
 ## [2.3.0] - 2026-06-30
 
 ### Added
@@ -93,7 +98,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.1...HEAD
+[2.3.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.0...v2.2.1
