@@ -1,6 +1,6 @@
 [project]
 name = "random-plex-movie"
-version = "2.3.1"
+version = "2.3.2"
 description = "Pick and play a random unwatched Plex movie"
 requires-python = ">=3.11"
 dependencies = [

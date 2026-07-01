@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-07-01
+
+### Added
+- `GET /health` endpoint — returns `{"ok": true}` (200) when Plex is reachable, `{"ok": false}` (503) otherwise
+- `HEALTHCHECK` in Dockerfile — Docker polls `/health` every 30s and marks the container `healthy` or `unhealthy`
+
 ## [2.3.1] - 2026-06-30
 
 ### Changed
@@ -98,7 +104,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `requirements.txt`
 - `[set_path]` config section (Chrome path override no longer needed)
 
-[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.1...HEAD
+[Unreleased]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.2...HEAD
+[2.3.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/keif/Random-Plex-Movie/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.2...v2.3.0
 [2.2.2]: https://github.com/keif/Random-Plex-Movie/compare/v2.2.1...v2.2.2
