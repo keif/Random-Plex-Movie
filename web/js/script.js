@@ -3,11 +3,12 @@ const loadingEl = document.getElementById("loading-overlay");
 const errorStateEl = document.getElementById("error-state");
 const errorMsgEl = document.getElementById("error-message");
 
-const filterState = { genre: "", year_min: null, year_max: null, rating_min: null };
+const filterState = { genre: "", year_min: null, year_max: null, rating_min: null, unwatched_only: true };
 
 function activeFilterCount() {
     return [filterState.genre, filterState.year_min, filterState.year_max, filterState.rating_min]
-        .filter(v => v !== "" && v !== null).length;
+        .filter(v => v !== "" && v !== null).length
+        + (filterState.unwatched_only ? 0 : 1);
 }
 
 function updateFilterButton() {
@@ -15,19 +16,25 @@ function updateFilterButton() {
     document.getElementById("btn_filters").textContent = count > 0 ? `FILTERS (${count})` : "FILTERS";
 }
 
-function buildMovieUrl() {
+function buildParams() {
     const params = new URLSearchParams();
     if (filterState.genre) params.set("genre", filterState.genre);
     if (filterState.year_min !== null) params.set("year_min", filterState.year_min);
     if (filterState.year_max !== null) params.set("year_max", filterState.year_max);
     if (filterState.rating_min !== null) params.set("rating_min", filterState.rating_min);
-    const qs = params.toString();
+    if (!filterState.unwatched_only) params.set("unwatched_only", "false");
+    return params;
+}
+
+function buildMovieUrl() {
+    const qs = buildParams().toString();
     return qs ? `/api/movie?${qs}` : "/api/movie";
 }
 
 async function loadFilters() {
     try {
-        const res = await fetch("/api/filters");
+        const qs = buildParams().toString();
+        const res = await fetch(qs ? `/api/filters?${qs}` : "/api/filters");
         if (!res.ok) return;
         const data = await res.json();
         const select = document.getElementById("filter_genre");
@@ -210,15 +217,22 @@ document.getElementById("filter_rating_min").addEventListener("change", e => {
     updateFilterButton();
 });
 
+document.getElementById("filter_unwatched_only").addEventListener("change", e => {
+    filterState.unwatched_only = e.target.checked;
+    updateFilterButton();
+});
+
 document.getElementById("btn_clear_filters").addEventListener("click", () => {
     filterState.genre = "";
     filterState.year_min = null;
     filterState.year_max = null;
     filterState.rating_min = null;
+    filterState.unwatched_only = true;
     document.getElementById("filter_genre").value = "";
     document.getElementById("filter_year_min").value = "";
     document.getElementById("filter_year_max").value = "";
     document.getElementById("filter_rating_min").value = "";
+    document.getElementById("filter_unwatched_only").checked = true;
     updateFilterButton();
 });
 

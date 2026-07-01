@@ -122,6 +122,20 @@ class TestGetMovieFilters:
         assert r.status_code == 404
         assert "filters" not in r.get_json()["error"]
 
+    def test_unwatched_only_false_calls_search_without_filter(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [_make_movie()]
+        r = client.get("/api/movie?unwatched_only=false")
+        assert r.status_code == 200
+        section.search.assert_called_once_with()
+
+    def test_unwatched_only_true_is_default(self, client, mock_plex):
+        _, section = mock_plex
+        section.search.return_value = [_make_movie()]
+        r = client.get("/api/movie")
+        assert r.status_code == 200
+        section.search.assert_called_once_with(unwatched=True)
+
 
 class TestConnectPlex:
     def test_uses_configured_library_name(self, monkeypatch):

@@ -327,6 +327,26 @@ main {
     font-weight: 700;
 }
 
+.filter_row--toggle {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-end;
+    padding-bottom: 8px;
+}
+
+.filter_row--toggle label {
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.filter_row--toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #E5A00D;
+    cursor: pointer;
+}
+
 #btn_clear_filters {
     background: transparent;
     border: 1px solid #555;
